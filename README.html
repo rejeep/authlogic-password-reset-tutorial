@@ -1,0 +1,337 @@
+
+<html>
+  <head><title>README.markdown</title></head>
+  <body>
+<h1>Authlogic Password Reset Tutorial</h1>
+
+<h2>Introduction</h2>
+
+<p>This tutorial will help you set up password reset restfully with Authlogic.
+This tutorial is based on
+<a href="http://www.binarylogic.com/2008/11/16/tutorial-reset-passwords-with-authlogic/">this blog post</a>
+Hopefully having it as a Git repository, it will always be up to date.</p>
+
+<ol>
+<li>A user requests a password reset</li>
+<li>An email is sent to them with a link to reset their password</li>
+<li>The user verifies their identity by using the link in the email</li>
+<li>They are presented with a basic form to change their password</li>
+<li>After they change their password we log them in</li>
+</ol>
+
+
+<p>Shoulda
+Formtastic
+Cucumber
+Haml</p>
+
+<h2>Perishable Token</h2>
+
+<p>First, you need to add a column in the users table, called
+<strong>perishable_token</strong>. A perishable_token is a temporary string used
+for identification.</p>
+
+<p>Generate the migration:</p>
+
+<pre><code>$ script/generate migration add_perishable_token_to_users
+</code></pre>
+
+<p>And add this contents:</p>
+
+<pre><code>class AddUsersPasswordResetFields &lt; ActiveRecord::Migration  
+  def self.up  
+    add_column :users, :perishable_token, :string, :default =&gt; "", :null =&gt; false
+
+    add_index :users, :perishable_token  
+  end  
+
+  def self.down  
+    remove_column :users, :perishable_token  
+  end  
+end  
+</code></pre>
+
+<p>Don't forget to migrate the database.</p>
+
+<pre><code>$ rake db:migrate
+</code></pre>
+
+<h2>Password Resets controller</h2>
+
+<p>Next up we add a controller called password resets.</p>
+
+<pre><code>$ script/generate controller password_resets
+</code></pre>
+
+<p>Add this contents to it:</p>
+
+<pre><code>class PasswordResetsController &lt; ApplicationController
+
+  before_filter :require_no_user
+  before_filter :load_user_using_perishable_token, :only =&gt; [ :edit, :update ]
+
+  def new
+  end
+
+  def create
+    @user = User.find_by_email(params[:email])
+    if @user
+      @user.deliver_password_reset_instructions!
+
+      flash[:notice] = "Instructions to reset your password have been emailed to you"
+
+      redirect_to root_path
+    else
+      flash[:error] = "No user was found with that email address"
+
+      render :action =&gt; :new
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    @user.password = params[:user][:password]
+    if @user.save
+      flash[:success] = "Password successfully updated"
+
+      redirect_to @user
+    else
+      render :action =&gt; :edit
+    end
+  end
+
+
+  private
+
+  def load_user_using_perishable_token
+    @user = User.find_using_perishable_token(params[:id])
+    unless @user
+      flash[:error] = "We're sorry, but we could not locate your account"
+
+      redirect_to root_url
+    end
+  end
+end
+</code></pre>
+
+<p>Add a route to that controller:</p>
+
+<pre><code>map.resources :password_resets, :only =&gt; [ :new, :create, :edit, :update ]
+</code></pre>
+
+<p>New view:</p>
+
+<pre><code>%h1 Reset Password
+
+%p Please fill in your email address below.
+
+- form_tag password_resets_path do
+  = text_field_tag :email
+  = submit_tag "Reset Password"
+</code></pre>
+
+<p>Edit view:</p>
+
+<pre><code>%h1 Update your password
+
+- semantic_form_for @user, :url =&gt; password_reset_path, :method =&gt; :put do |form|
+  - form.inputs do
+    = form.input :password, :as =&gt; :password
+  - form.buttons do
+    = form.commit_button
+</code></pre>
+
+<p>You might also want to test the controller. Here's an example with Shoulda.
+This test also inclues the case when a user is logged in by using
+<strong>should_require_no_user</strong>. If you are not familiar with that, read
+<a href="http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html">this blog post</a>
+If you feel that it is unnessesary, just remove those four lines in the test.</p>
+
+<pre><code>class PasswordResetsControllerTest &lt; ActionController::TestCase
+
+  request_new = lambda do
+    get :new
+  end
+
+  request_create = lambda do
+    post :create, :email =&gt; Factory(:user).email
+  end
+
+  request_edit = lambda do
+    get :edit, :id =&gt; Factory(:user).perishable_token
+  end
+
+  request_update = lambda do
+    @user = Factory(:user)
+
+    put :update, :id =&gt; @user.perishable_token, :user =&gt; { :password =&gt; "newpassword" }
+  end
+
+  should_require_no_user "on GET to :new", &amp;request_new
+  should_require_no_user "on POST to :create", &amp;request_create
+  should_require_no_user "on GET to :edit", &amp;request_edit
+  should_require_no_user "on PUT to :update", &amp;request_update
+
+  context "when not logged in" do
+    context "on GET to :new" do
+      setup &amp;request_new
+
+      should_respond_with :success
+      should_render_template :new
+    end
+
+    context "on POST to :create" do
+      setup &amp;request_create
+
+      should_assign_to :user
+      should_respond_with :redirect
+      should_redirect_to("the dashboard") { root_path }
+      should "send an email" do
+        assert_sent_email
+      end
+    end
+
+    context "on GET to :edit" do
+      setup &amp;request_edit
+
+      should_assign_to :user
+      should_respond_with :success
+      should_render_template :edit
+    end
+
+    context "on PUT to :update" do
+      setup &amp;request_update
+
+      should_assign_to :user
+      should_respond_with :redirect
+      should_redirect_to("the dashboard") { @user }
+    end
+  end
+
+end
+</code></pre>
+
+<p>As you might noticed, in the password resets controller there was a
+method call on the user called
+<strong>deliver_password_reset_instructions</strong>.
+Lets add that method to the user model:</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  def deliver_password_reset_instructions!
+    reset_perishable_token!
+
+    Notifier.deliver_password_reset_instructions(self)
+  end
+end
+</code></pre>
+
+<p>Lets also add a <strong>simple</strong> test for this:</p>
+
+<pre><code>context "Delivering password instructions" do
+  setup do
+    @user = Factory(:user)
+    @user.deliver_password_reset_instructions!
+  end
+
+  should "send an email" do
+    assert_sent_email
+  end
+end    
+</code></pre>
+
+<p>Now we need to add that mailer method:</p>
+
+<pre><code>class Notifier &lt; ActionMailer::Base
+  def password_reset_instructions(user)
+    subject       "Password Reset Instructions"
+    from          "noreplay@domain.com
+    recipients    user.email
+    sent_on       Time.now
+    body          :edit_password_reset_url =&gt; edit_password_reset_url(user.perishable_token)
+  end
+end
+</code></pre>
+
+<p>The mailer view:</p>
+
+<pre><code>%h1= Password Reset Instructions
+
+%p
+  A request to reset your password has been made. If you did not
+  make this request, simply ignore this email. If you did make this
+  request, follow the link below.
+
+= link_to "Reset Password!", @edit_password_reset_url
+</code></pre>
+
+<p>And the mail test:</p>
+
+<pre><code>class NotifierTest &lt; ActionMailer::TestCase
+  context "email password reset instructions" do
+    setup do
+      @user = Factory(:user)
+      @user.deliver_password_reset_instructions!
+    end
+
+    should "send an email" do
+      assert_sent_email do |email|
+        email.subject =~ /Password Reset Instructions/
+        email.body =~ /#{@user.perishable_token}/
+        email.body =~ /Password Reset Instructions/
+      end
+    end
+  end
+end
+</code></pre>
+
+<p>You might also want to create a Cucumber test for it:</p>
+
+<p>  Scenario: Reset password</p>
+
+<pre><code>Given I am not logged in
+And there is a user with login "login" and email "user@domain.com" and password "password"
+And I am on the login page
+Then I should see "Forgot Password"
+When I follow "Forgot Password"
+Then I should see "Reset Password"
+And I should see "Please fill in your email address below"
+When I fill in "email" with "user@domain.com"
+And I press "Reset Password"
+Then I should see "Instructions to reset your password have been emailed to you"
+And "user@domain.com" should have an email
+When I open the email
+Then I should see "Password Reset Instructions" in the email body
+When I follow "Reset Password" in the email
+Then I should see "Update your password"
+When I fill in "Password" with "newpassword"
+And I press "Update Password"
+Then I should see "Password successfully updated"
+When I am not logged in
+Then I should be able to log in with login "login" and password "newpassword"
+</code></pre>
+
+<p>Here are the needed user steps:</p>
+
+<pre><code>Given /^I am not logged in$/ do
+  visit logout_path
+end
+
+Given /^there is a user with login "([^\"]*)" and password "([^\"]*)"$/ do |login, password|
+  Factory(:user, :login =&gt; login, :password =&gt; password)
+end
+
+Given /^there is a user with login "([^\"]*)" and email "([^\"]*)" and password "([^\"]*)"$/ do |login, email, password|
+  Factory(:user, :login =&gt; login, :email =&gt; email, :password =&gt; password)
+end
+
+Then /^I should be able to log in with login "([^\"]*)" and password "([^\"]*)"$/ do |login, password|
+  UserSession.new(:login =&gt; login, :password =&gt; password).save.should == true
+end
+</code></pre>
+
+<p>If you liked this tutorial, I can also recommend this
+<a href="http://github.com/matthooks/authlogic-activation-tutorial">Authlogic Activation Tutorial</a></p>
+  </body>
+</html>
