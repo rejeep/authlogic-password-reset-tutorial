@@ -268,25 +268,25 @@ You might also want to create a Cucumber test for it:
 
   Scenario: Reset password
     Given I am not logged in
-    And there is a user with login "login" and email "user@domain.com" and password "password"
-    And I am on the login page
-    Then I should see "Forgot Password"
-    When I follow "Forgot Password"
-    Then I should see "Reset Password"
-    And I should see "Please fill in your email address below"
-    When I fill in "email" with "user@domain.com"
-    And I press "Reset Password"
-    Then I should see "Instructions to reset your password have been emailed to you"
-    And "user@domain.com" should have an email
-    When I open the email
-    Then I should see "Password Reset Instructions" in the email body
-    When I follow "Reset Password" in the email
-    Then I should see "Update your password"
-    When I fill in "Password" with "newpassword"
-    And I press "Update Password"
-    Then I should see "Password successfully updated"
-    When I am not logged in
-    Then I should be able to log in with login "login" and password "newpassword"
+      And there is a user with login "login" and email "user@domain.com" and password "password"
+      And I am on the login page
+      Then I should see "Forgot Password"
+      When I follow "Forgot Password"
+      Then I should see "Reset Password"
+      And I should see "Please fill in your email address below"
+      When I fill in "email" with "user@domain.com"
+      And I press "Reset Password"
+      Then I should see "Instructions to reset your password have been emailed to you"
+      And "user@domain.com" should have an email
+      When I open the email
+      Then I should see "Password Reset Instructions" in the email body
+      When I follow "Reset Password" in the email
+      Then I should see "Update your password"
+      When I fill in "Password" with "newpassword"
+      And I press "Update Password"
+      Then I should see "Password successfully updated"
+      When I am not logged in
+      Then I should be able to log in with login "login" and password "newpassword"
 
 
 Here are the needed user steps:
