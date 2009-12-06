@@ -315,5 +315,5 @@ The user steps
       UserSession.new(:login => login, :password => password).save.should == true
     end
 
-If you liked this tutorial, I can also recommend this
+If you liked this tutorial, I can also recommend the
 [Authlogic Activation Tutorial](http://github.com/matthooks/authlogic-activation-tutorial).
