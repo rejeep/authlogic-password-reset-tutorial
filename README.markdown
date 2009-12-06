@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This tutorial will help you set up password reset, restfully with Authlogic.
+This tutorial will help you set up password reset restfully, with Authlogic.
 This tutorial is based on
 [this blog post](http://www.binarylogic.com/2008/11/16/tutorial-reset-passwords-with-authlogic/).
 Hopefully, having the tutorial as a Git repository, it will be more up
