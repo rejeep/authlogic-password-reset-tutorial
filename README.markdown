@@ -20,7 +20,6 @@ the tools that are used, so if you're not familiar with any of
 them, check them out or replace them with your favorite tools.
 
 * [Shoulda](http://github.com/thoughtbot/shoulda)
-* [Formtastic](http://github.com/justinfrench/formtastic)
 * [Cucumber](http://github.com/aslakhellesoy/cucumber)
 * [Haml](http://github.com/nex3/haml)
 
@@ -86,7 +85,7 @@ With this contents
       end
 
       def update
-        @user.password = params[:user][:password]
+        @user.password = params[:password]
         if @user.save
           flash[:success] = "Password successfully updated"
 
@@ -127,11 +126,9 @@ The edit view (**app/views/password_resets/edit.html.haml**)
 
     %h1 Update your password
 
-    - semantic_form_for @user, :url => password_reset_path, :method => :put do |form|
-      - form.inputs do
-        = form.input :password, :as => :password
-      - form.buttons do
-        = form.commit_button
+    - form_tag password_reset_path, :method => :put do
+      = text_field_tag :password
+      = submit_tag "Update Password"
 
 ## Functional test
 
