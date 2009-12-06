@@ -27,7 +27,7 @@ them, check them out or replace them with your favorite tools.
 ## Perishable Token
 
 First, you need to add a column in the users table, called
-**perishable_token**. A perishable_token is a temporary string that
+**perishable_token**. A perishable token is a temporary string that
 can be used for basic identification.
 
 Generate the migration
