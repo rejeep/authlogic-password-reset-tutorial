@@ -8,47 +8,50 @@
 
 <p>This tutorial will help you set up password reset restfully with Authlogic.
 This tutorial is based on
-<a href="http://www.binarylogic.com/2008/11/16/tutorial-reset-passwords-with-authlogic/">this blog post</a>
-Hopefully having it as a Git repository, it will always be up to date.</p>
+<a href="http://www.binarylogic.com/2008/11/16/tutorial-reset-passwords-with-authlogic/">this blog post</a>.
+Hopefully, having the tutorial as a Git repository, it will be up to date.</p>
 
-<ol>
-<li>A user requests a password reset</li>
-<li>An email is sent to them with a link to reset their password</li>
-<li>The user verifies their identity by using the link in the email</li>
-<li>They are presented with a basic form to change their password</li>
-<li>After they change their password we log them in</li>
-</ol>
+<p>To reset a password, a user goes through these steps:
+1. The user requests a password reset
+2. An email is sent to the user with instructions
+3. The user verifies their identity by using the link in the email
+4. The user is presented with a basic form to change the password</p>
 
+<p>The tutorial will include all code, including tests. These tools are
+used, so if you're not familiar with any of them. Do check them out!</p>
 
-<p>Shoulda
-Formtastic
-Cucumber
-Haml</p>
+<ul>
+<li><a href="http://github.com/thoughtbot/shoulda">Shoulda</a></li>
+<li><a href="http://github.com/justinfrench/formtastic">Formtastic</a></li>
+<li><a href="http://github.com/aslakhellesoy/cucumber">Cucumber</a></li>
+<li><a href="http://github.com/nex3/haml">Haml</a></li>
+</ul>
+
 
 <h2>Perishable Token</h2>
 
 <p>First, you need to add a column in the users table, called
-<strong>perishable_token</strong>. A perishable_token is a temporary string used
-for identification.</p>
+<strong>perishable_token</strong>. A perishable_token is a temporary string that
+can be used for some basic identification.</p>
 
-<p>Generate the migration:</p>
+<p>Generate the migration.</p>
 
 <pre><code>$ script/generate migration add_perishable_token_to_users
 </code></pre>
 
-<p>And add this contents:</p>
+<p>Then add this contents to it.</p>
 
-<pre><code>class AddUsersPasswordResetFields &lt; ActiveRecord::Migration  
-  def self.up  
+<pre><code>class AddPerishableTokenToUsers &lt; ActiveRecord::Migration
+  def self.up
     add_column :users, :perishable_token, :string, :default =&gt; "", :null =&gt; false
 
-    add_index :users, :perishable_token  
-  end  
+    add_index :users, :perishable_token
+  end
 
-  def self.down  
-    remove_column :users, :perishable_token  
-  end  
-end  
+  def self.down
+    remove_column :users, :perishable_token
+  end
+end
 </code></pre>
 
 <p>Don't forget to migrate the database.</p>
@@ -63,7 +66,7 @@ end
 <pre><code>$ script/generate controller password_resets
 </code></pre>
 
-<p>Add this contents to it:</p>
+<p>With this contents.</p>
 
 <pre><code>class PasswordResetsController &lt; ApplicationController
 
@@ -116,12 +119,12 @@ end
 end
 </code></pre>
 
-<p>Add a route to that controller:</p>
+<p>Add the route.</p>
 
 <pre><code>map.resources :password_resets, :only =&gt; [ :new, :create, :edit, :update ]
 </code></pre>
 
-<p>New view:</p>
+<p>The new view (<strong>app/views/password_resets/new.html.haml</strong>):</p>
 
 <pre><code>%h1 Reset Password
 
@@ -132,7 +135,7 @@ end
   = submit_tag "Reset Password"
 </code></pre>
 
-<p>Edit view:</p>
+<p>The edit view (<strong>app/views/password_resets/edit.html.haml</strong>):</p>
 
 <pre><code>%h1 Update your password
 
@@ -143,11 +146,12 @@ end
     = form.commit_button
 </code></pre>
 
-<p>You might also want to test the controller. Here's an example with Shoulda.
-This test also inclues the case when a user is logged in by using
-<strong>should_require_no_user</strong>. If you are not familiar with that, read
-<a href="http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html">this blog post</a>
-If you feel that it is unnessesary, just remove those four lines in the test.</p>
+<p>And the functional test. This test also inclues the case when a user is logged in
+by using <strong>should_require_no_user</strong>. If you are not familiar with
+that method, read
+<a href="http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html">this blog post</a>.
+If you feel that it is unnessesary, just remove those four lines from
+the test.</p>
 
 <pre><code>class PasswordResetsControllerTest &lt; ActionController::TestCase
 
@@ -213,10 +217,9 @@ If you feel that it is unnessesary, just remove those four lines in the test.</p
 end
 </code></pre>
 
-<p>As you might noticed, in the password resets controller there was a
-method call on the user called
-<strong>deliver_password_reset_instructions</strong>.
-Lets add that method to the user model:</p>
+<p>As you might noticed, in the password resets controller there is a
+method call on the user to <strong>deliver_password_reset_instructions!</strong>.
+Lets add that method to the user model.</p>
 
 <pre><code>class User &lt; ActiveRecord::Base
   def deliver_password_reset_instructions!
@@ -227,7 +230,7 @@ Lets add that method to the user model:</p>
 end
 </code></pre>
 
-<p>Lets also add a <strong>simple</strong> test for this:</p>
+<p>And the test.</p>
 
 <pre><code>context "Delivering password instructions" do
   setup do
@@ -238,10 +241,10 @@ end
   should "send an email" do
     assert_sent_email
   end
-end    
+end
 </code></pre>
 
-<p>Now we need to add that mailer method:</p>
+<p>Now, lets add the mailer method.</p>
 
 <pre><code>class Notifier &lt; ActionMailer::Base
   def password_reset_instructions(user)
@@ -254,7 +257,7 @@ end
 end
 </code></pre>
 
-<p>The mailer view:</p>
+<p>And the mailer view.</p>
 
 <pre><code>%h1= Password Reset Instructions
 
@@ -266,7 +269,7 @@ end
 = link_to "Reset Password!", @edit_password_reset_url
 </code></pre>
 
-<p>And the mail test:</p>
+<p>And the mailer test.</p>
 
 <pre><code>class NotifierTest &lt; ActionMailer::TestCase
   context "email password reset instructions" do
@@ -286,33 +289,32 @@ end
 end
 </code></pre>
 
-<p>You might also want to create a Cucumber test for it:</p>
+<p>And at last, you might also want to create a Cucumber test for it.</p>
 
-<p>  Scenario: Reset password</p>
-
-<pre><code>Given I am not logged in
-And there is a user with login "login" and email "user@domain.com" and password "password"
-And I am on the login page
-Then I should see "Forgot Password"
-When I follow "Forgot Password"
-Then I should see "Reset Password"
-And I should see "Please fill in your email address below"
-When I fill in "email" with "user@domain.com"
-And I press "Reset Password"
-Then I should see "Instructions to reset your password have been emailed to you"
-And "user@domain.com" should have an email
-When I open the email
-Then I should see "Password Reset Instructions" in the email body
-When I follow "Reset Password" in the email
-Then I should see "Update your password"
-When I fill in "Password" with "newpassword"
-And I press "Update Password"
-Then I should see "Password successfully updated"
-When I am not logged in
-Then I should be able to log in with login "login" and password "newpassword"
+<pre><code>Scenario: Reset password
+  Given I am not logged in
+  And there is a user with login "login" and email "user@domain.com" and password "password"
+  And I am on the login page
+  Then I should see "Forgot Password"
+  When I follow "Forgot Password"
+  Then I should see "Reset Password"
+  And I should see "Please fill in your email address below"
+  When I fill in "email" with "user@domain.com"
+  And I press "Reset Password"
+  Then I should see "Instructions to reset your password have been emailed to you"
+  And "user@domain.com" should have an email
+  When I open the email
+  Then I should see "Password Reset Instructions" in the email body
+  When I follow "Reset Password" in the email
+  Then I should see "Update your password"
+  When I fill in "Password" with "newpassword"
+  And I press "Update Password"
+  Then I should see "Password successfully updated"
+  When I am not logged in
+  Then I should be able to log in with login "login" and password "newpassword"
 </code></pre>
 
-<p>Here are the needed user steps:</p>
+<p>And the user steps.</p>
 
 <pre><code>Given /^I am not logged in$/ do
   visit logout_path
@@ -332,6 +334,6 @@ end
 </code></pre>
 
 <p>If you liked this tutorial, I can also recommend this
-<a href="http://github.com/matthooks/authlogic-activation-tutorial">Authlogic Activation Tutorial</a></p>
+<a href="http://github.com/matthooks/authlogic-activation-tutorial">Authlogic Activation Tutorial</a>.</p>
   </body>
 </html>
