@@ -102,7 +102,7 @@ With this contents
       def load_user_using_perishable_token
         @user = User.find_using_perishable_token(params[:id])
         unless @user
-          flash[:error] = "We're sorry, but we could not locate your account"f
+          flash[:error] = "We're sorry, but we could not locate your account"
 
           redirect_to root_url
         end
