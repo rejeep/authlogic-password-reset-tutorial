@@ -6,19 +6,25 @@
 
 <h2>Introduction</h2>
 
-<p>This tutorial will help you set up password reset restfully with Authlogic.
+<p>This tutorial will help you set up password reset, restfully with Authlogic.
 This tutorial is based on
 <a href="http://www.binarylogic.com/2008/11/16/tutorial-reset-passwords-with-authlogic/">this blog post</a>.
-Hopefully, having the tutorial as a Git repository, it will be up to date.</p>
+Hopefully, having the tutorial as a Git repository, it will be more up
+to date.</p>
 
-<p>To reset a password, a user goes through these steps:
-1. The user requests a password reset
-2. An email is sent to the user with instructions
-3. The user verifies their identity by using the link in the email
-4. The user is presented with a basic form to change the password</p>
+<p>To reset a password, the user goes through these steps:</p>
 
-<p>The tutorial will include all code, including tests. These tools are
-used, so if you're not familiar with any of them. Do check them out!</p>
+<ol>
+<li>The user requests a password reset</li>
+<li>An email is sent to the user with instructions</li>
+<li>The user verifies their identity by using the link in the email</li>
+<li>The user is presented with a basic form to change the password</li>
+</ol>
+
+
+<p>The tutorial will include all code, including tests. Below you'll see
+the tools that are used, so if you're not familiar with any of
+them, check them out or replace them with your favorite tools.</p>
 
 <ul>
 <li><a href="http://github.com/thoughtbot/shoulda">Shoulda</a></li>
@@ -32,14 +38,14 @@ used, so if you're not familiar with any of them. Do check them out!</p>
 
 <p>First, you need to add a column in the users table, called
 <strong>perishable_token</strong>. A perishable_token is a temporary string that
-can be used for some basic identification.</p>
+can be used for basic identification.</p>
 
-<p>Generate the migration.</p>
+<p>Generate the migration</p>
 
 <pre><code>$ script/generate migration add_perishable_token_to_users
 </code></pre>
 
-<p>Then add this contents to it.</p>
+<p>Then add this contents to it</p>
 
 <pre><code>class AddPerishableTokenToUsers &lt; ActiveRecord::Migration
   def self.up
@@ -54,19 +60,19 @@ can be used for some basic identification.</p>
 end
 </code></pre>
 
-<p>Don't forget to migrate the database.</p>
+<p>Don't forget to migrate the database</p>
 
 <pre><code>$ rake db:migrate
 </code></pre>
 
 <h2>Password Resets controller</h2>
 
-<p>Next up we add a controller called password resets.</p>
+<p>Next up we add a controller called password resets</p>
 
 <pre><code>$ script/generate controller password_resets
 </code></pre>
 
-<p>With this contents.</p>
+<p>With this contents</p>
 
 <pre><code>class PasswordResetsController &lt; ApplicationController
 
@@ -111,7 +117,7 @@ end
   def load_user_using_perishable_token
     @user = User.find_using_perishable_token(params[:id])
     unless @user
-      flash[:error] = "We're sorry, but we could not locate your account"
+      flash[:error] = "We're sorry, but we could not locate your account"f
 
       redirect_to root_url
     end
@@ -119,12 +125,12 @@ end
 end
 </code></pre>
 
-<p>Add the route.</p>
+<p>The route</p>
 
 <pre><code>map.resources :password_resets, :only =&gt; [ :new, :create, :edit, :update ]
 </code></pre>
 
-<p>The new view (<strong>app/views/password_resets/new.html.haml</strong>):</p>
+<p>The new view (<strong>app/views/password_resets/new.html.haml</strong>)</p>
 
 <pre><code>%h1 Reset Password
 
@@ -135,7 +141,7 @@ end
   = submit_tag "Reset Password"
 </code></pre>
 
-<p>The edit view (<strong>app/views/password_resets/edit.html.haml</strong>):</p>
+<p>The edit view (<strong>app/views/password_resets/edit.html.haml</strong>)</p>
 
 <pre><code>%h1 Update your password
 
@@ -146,9 +152,10 @@ end
     = form.commit_button
 </code></pre>
 
-<p>And the functional test. This test also inclues the case when a user is logged in
-by using <strong>should_require_no_user</strong>. If you are not familiar with
-that method, read
+<h2>Functional test</h2>
+
+<p>This test includes the case when a user is logged in by using
+<strong>should_require_no_user</strong>. If you are not familiar with that method, read
 <a href="http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html">this blog post</a>.
 If you feel that it is unnessesary, just remove those four lines from
 the test.</p>
@@ -217,9 +224,11 @@ the test.</p>
 end
 </code></pre>
 
+<h2>The mail</h2>
+
 <p>As you might noticed, in the password resets controller there is a
 method call on the user to <strong>deliver_password_reset_instructions!</strong>.
-Lets add that method to the user model.</p>
+Lets add that method to the user model</p>
 
 <pre><code>class User &lt; ActiveRecord::Base
   def deliver_password_reset_instructions!
@@ -230,7 +239,7 @@ Lets add that method to the user model.</p>
 end
 </code></pre>
 
-<p>And the test.</p>
+<p>The user test</p>
 
 <pre><code>context "Delivering password instructions" do
   setup do
@@ -244,7 +253,7 @@ end
 end
 </code></pre>
 
-<p>Now, lets add the mailer method.</p>
+<p>The mailer method</p>
 
 <pre><code>class Notifier &lt; ActionMailer::Base
   def password_reset_instructions(user)
@@ -257,7 +266,7 @@ end
 end
 </code></pre>
 
-<p>And the mailer view.</p>
+<p>The mailer view</p>
 
 <pre><code>%h1= Password Reset Instructions
 
@@ -269,7 +278,7 @@ end
 = link_to "Reset Password!", @edit_password_reset_url
 </code></pre>
 
-<p>And the mailer test.</p>
+<p>The mailer test</p>
 
 <pre><code>class NotifierTest &lt; ActionMailer::TestCase
   context "email password reset instructions" do
@@ -289,7 +298,9 @@ end
 end
 </code></pre>
 
-<p>And at last, you might also want to create a Cucumber test for it.</p>
+<h2>Integration test</h2>
+
+<p>And at last, you might also want to create a Cucumber test for it</p>
 
 <pre><code>Scenario: Reset password
   Given I am not logged in
@@ -314,7 +325,7 @@ end
   Then I should be able to log in with login "login" and password "newpassword"
 </code></pre>
 
-<p>And the user steps.</p>
+<p>The user steps</p>
 
 <pre><code>Given /^I am not logged in$/ do
   visit logout_path

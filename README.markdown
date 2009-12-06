@@ -8,15 +8,16 @@ This tutorial is based on
 Hopefully, having the tutorial as a Git repository, it will be more up
 to date.
 
-To reset a password, a user goes through these steps:
+To reset a password, the user goes through these steps:
 
 1. The user requests a password reset
 2. An email is sent to the user with instructions
 3. The user verifies their identity by using the link in the email
 4. The user is presented with a basic form to change the password
 
-The tutorial will include all code, including tests. These tools are
-used, so if you're not familiar with any of them. Do check them out!
+The tutorial will include all code, including tests. Below you'll see
+the tools that are used, so if you're not familiar with any of
+them, check them out or replace them with your favorite tools.
 
 * [Shoulda](http://github.com/thoughtbot/shoulda)
 * [Formtastic](http://github.com/justinfrench/formtastic)
@@ -27,13 +28,13 @@ used, so if you're not familiar with any of them. Do check them out!
 
 First, you need to add a column in the users table, called
 **perishable_token**. A perishable_token is a temporary string that
-can be used for some basic identification.
+can be used for basic identification.
 
-Generate the migration.
+Generate the migration
 
     $ script/generate migration add_perishable_token_to_users
 
-Then add this contents to it.
+Then add this contents to it
     class AddPerishableTokenToUsers < ActiveRecord::Migration
       def self.up
         add_column :users, :perishable_token, :string, :default => "", :null => false
@@ -46,17 +47,17 @@ Then add this contents to it.
       end
     end
 
-Don't forget to migrate the database.
+Don't forget to migrate the database
 
     $ rake db:migrate
 
 ## Password Resets controller
 
-Next up we add a controller called password resets.
+Next up we add a controller called password resets
 
     $ script/generate controller password_resets
 
-With this contents.
+With this contents
 
     class PasswordResetsController < ApplicationController
 
@@ -101,18 +102,18 @@ With this contents.
       def load_user_using_perishable_token
         @user = User.find_using_perishable_token(params[:id])
         unless @user
-          flash[:error] = "We're sorry, but we could not locate your account"
+          flash[:error] = "We're sorry, but we could not locate your account"f
 
           redirect_to root_url
         end
       end
     end
 
-Add the route.
+The route
 
     map.resources :password_resets, :only => [ :new, :create, :edit, :update ]
 
-The new view (**app/views/password_resets/new.html.haml**):
+The new view (**app/views/password_resets/new.html.haml**)
 
     %h1 Reset Password
 
@@ -122,7 +123,7 @@ The new view (**app/views/password_resets/new.html.haml**):
       = text_field_tag :email
       = submit_tag "Reset Password"
 
-The edit view (**app/views/password_resets/edit.html.haml**):
+The edit view (**app/views/password_resets/edit.html.haml**)
 
     %h1 Update your password
 
@@ -132,9 +133,10 @@ The edit view (**app/views/password_resets/edit.html.haml**):
       - form.buttons do
         = form.commit_button
 
-And the functional test. This test also inclues the case when a user is logged in
-by using **should_require_no_user**. If you are not familiar with
-that method, read
+## Functional test
+
+This test includes the case when a user is logged in by using
+**should_require_no_user**. If you are not familiar with that method, read
 [this blog post](http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html).
 If you feel that it is unnessesary, just remove those four lines from
 the test.
@@ -202,9 +204,10 @@ the test.
 
     end
 
+## The mail
 As you might noticed, in the password resets controller there is a
 method call on the user to **deliver_password_reset_instructions!**.
-Lets add that method to the user model.
+Lets add that method to the user model
 
     class User < ActiveRecord::Base
       def deliver_password_reset_instructions!
@@ -214,7 +217,7 @@ Lets add that method to the user model.
       end
     end
 
-And the test.
+The user test
 
     context "Delivering password instructions" do
       setup do
@@ -227,7 +230,7 @@ And the test.
       end
     end
 
-Now, lets add the mailer method.
+The mailer method
 
     class Notifier < ActionMailer::Base
       def password_reset_instructions(user)
@@ -239,7 +242,7 @@ Now, lets add the mailer method.
       end
     end
 
-And the mailer view.
+The mailer view
 
     %h1= Password Reset Instructions
 
@@ -250,7 +253,7 @@ And the mailer view.
 
     = link_to "Reset Password!", @edit_password_reset_url
 
-And the mailer test.
+The mailer test
 
     class NotifierTest < ActionMailer::TestCase
       context "email password reset instructions" do
@@ -269,7 +272,8 @@ And the mailer test.
       end
     end
 
-And at last, you might also want to create a Cucumber test for it.
+## Integration test
+And at last, you might also want to create a Cucumber test for it
 
     Scenario: Reset password
       Given I am not logged in
@@ -293,7 +297,7 @@ And at last, you might also want to create a Cucumber test for it.
       When I am not logged in
       Then I should be able to log in with login "login" and password "newpassword"
 
-And the user steps.
+The user steps
 
     Given /^I am not logged in$/ do
       visit logout_path
@@ -310,7 +314,6 @@ And the user steps.
     Then /^I should be able to log in with login "([^\"]*)" and password "([^\"]*)"$/ do |login, password|
       UserSession.new(:login => login, :password => password).save.should == true
     end
-
 
 If you liked this tutorial, I can also recommend this
 [Authlogic Activation Tutorial](http://github.com/matthooks/authlogic-activation-tutorial).
