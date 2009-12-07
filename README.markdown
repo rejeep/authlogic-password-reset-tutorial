@@ -106,6 +106,7 @@ With this contents
           redirect_to root_url
         end
       end
+
     end
 
 The route
