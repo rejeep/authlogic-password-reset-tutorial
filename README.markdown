@@ -242,7 +242,7 @@ The mailer method
 
 The mailer view
 
-    %h1= Password Reset Instructions
+    %h1 Password Reset Instructions
 
     %p
       A request to reset your password has been made. If you did not
