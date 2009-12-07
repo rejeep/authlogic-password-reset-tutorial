@@ -271,7 +271,10 @@ The mailer test
     end
 
 ## Integration test
-And at last, you might also want to create a Cucumber test for it
+And at last, you might also want to create a Cucumber test for
+it. Note that you need the
+[Email Spec plugin](http://github.com/bmabey/email-spec)
+for this feature.
 
     Scenario: Reset password
       Given I am not logged in
