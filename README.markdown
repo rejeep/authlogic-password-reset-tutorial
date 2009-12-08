@@ -22,6 +22,7 @@ them, check them out or replace them with your favorite tools.
 * [Shoulda](http://github.com/thoughtbot/shoulda)
 * [Cucumber](http://github.com/aslakhellesoy/cucumber)
 * [Haml](http://github.com/nex3/haml)
+* [Factory Girl](http://github.com/thoughtbot/factory_girl)
 
 ## Perishable Token
 
