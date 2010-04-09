@@ -136,7 +136,7 @@ The edit view (**app/views/password_resets/edit.html.haml**)
 
 This test includes the case when a user is logged in by using
 **should_require_no_user**. If you are not familiar with that method, read
-[this blog post](http://tuxicity.se/rails/refactor/test/2009/11/24/testing-user-privileges-with-shoulda.html).
+[this blog post](http://blog.tuxicity.se/rails/refactoring/testing/2009/11/24/testing-user-privileges-with-shoulda.html).
 If you feel that it is unnessesary, just remove those four lines from
 the test.
 
