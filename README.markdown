@@ -129,7 +129,7 @@ The edit view (**app/views/password_resets/edit.html.haml**)
     %h1 Update your password
 
     - form_tag password_reset_path, :method => :put do
-      = text_field_tag :password
+      = password_field_tag :password
       = submit_tag "Update Password"
 
 ## Functional test
