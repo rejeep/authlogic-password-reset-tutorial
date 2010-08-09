@@ -161,19 +161,19 @@ for more information. If you feel that it is unnessesary, just remove
 those four lines from the test.
 
     class PasswordResetsControllerTest < ActionController::TestCase
-      request_new = lambda do
+      request_new = proc do
         get :new
       end
      
-      request_create = lambda do
+      request_create = proc do
         post :create, :email => Factory(:user).email
       end
      
-      request_edit = lambda do
+      request_edit = proc do
         get :edit, :id => Factory(:user).perishable_token
       end
      
-      request_update = lambda do
+      request_update = proc do
         @user = Factory(:user)
         put :update, :id => @user.perishable_token, :user => { :password => "newpassword" }
       end
