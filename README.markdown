@@ -85,6 +85,8 @@ With this contents:
      
       def update
         @user.password = params[:password]
+        # Only if your are using password confirmation
+        # @user.password_confirmation = params[:password]
         if @user.save
           flash[:success] = "Your password was successfully updated"
           redirect_to @user
