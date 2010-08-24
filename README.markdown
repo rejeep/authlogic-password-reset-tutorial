@@ -357,7 +357,7 @@ for this feature.
       visit logout_path
     end
      
-    Then /^I should be able to log in with user@domain.com "([^\"]*)" and password "([^\"]*)"$/ do |email, password|
+    Then /^I should be able to log in with email "([^\"]*)" and password "([^\"]*)"$/ do |email, password|
       UserSession.new(:email => email, :password => password).save.should == true
     end
      
