@@ -75,7 +75,7 @@ With this contents:
           flash[:notice] = "Instructions to reset your password have been emailed to you"
           redirect_to root_path
         else
-          flash[:error] = "No user was found with email address #{params[:email]}"
+          flash.now[:error] = "No user was found with email address #{params[:email]}"
           render :action => :new
         end
       end
