@@ -36,9 +36,11 @@ use it for simple identification. Add a column called
 the rest.
 
 Generate the migration:
+
     $ script/generate migration add_perishable_token_to_users
 
 The migration contents:
+
     class AddPerishableTokenToUsers < ActiveRecord::Migration
       def self.up
         add_column :users, :perishable_token, :string, :default => "", :null => false
@@ -51,15 +53,18 @@ The migration contents:
     end
 
 Don't forget to migrate the database:
+
     $ rake db:migrate
 
 
 ## Password Resets controller
 
 Next up we add a controller called _password resets_:
+
     $ script/generate controller password_resets
 
 With this contents:
+
     class PasswordResetsController < ApplicationController
       # Method from: http://github.com/binarylogic/authlogic_example/blob/master/app/controllers/application_controller.rb
       before_filter :require_no_user
@@ -108,12 +113,14 @@ With this contents:
     end
 
 Add this route:
+
     map.resources :password_resets, :only => [ :new, :create, :edit, :update ]
 
 ### Views
 
 #### Action: new
 ##### Erb
+
     <h1>Reset Password</h1>
      
     <p>Please enter your email address below and then press "Reset Password".</p>
@@ -124,6 +131,7 @@ Add this route:
     <% end %>
 
 ##### Haml
+
     %h1 Reset Password
      
     %p Please enter your email address below and then press "Reset Password".
@@ -135,6 +143,7 @@ Add this route:
 #### Action: edit
 
 ##### Erb
+
     <h1>Update your password</h1>
      
     <p>Please enter the new password below and then press "Update Password".</p>
@@ -145,6 +154,7 @@ Add this route:
     <% end %>
 
 ##### Haml
+
     %h1 Update your password
      
     %p Please enter the new password below and then press "Update Password".
@@ -229,6 +239,7 @@ As you might noticed, in the password resets controller there is a
 method call on the user to **deliver_password_reset_instructions!**.
 
 Lets add that method to the user model:
+
     class User < ActiveRecord::Base
       def deliver_password_reset_instructions!
         reset_perishable_token!
@@ -237,6 +248,7 @@ Lets add that method to the user model:
     end
 
 And test it:
+
     class UserTest < ActiveSupport::TestCase
       context "A user" do
         setup { @user = Factory(:user) }
@@ -253,6 +265,7 @@ And test it:
     end
 
 Add the mailer method:
+
     class Notifier < ActionMailer::Base
       def password_reset_instructions(user)
         subject      "Password Reset Instructions"
@@ -267,6 +280,7 @@ Add the mailer method:
 ### Mailer view
 
 #### Erb
+
     <h1>Password Reset Instructions</h1>
      
     <p>
@@ -278,6 +292,7 @@ Add the mailer method:
     <%= link_to "Reset Password!", @edit_password_reset_url %>
 
 #### Haml
+
     %h1 Password Reset Instructions
      
     %p
@@ -289,6 +304,7 @@ Add the mailer method:
 
 ### Test
 Test the mailer:
+
     class NotifierTest < ActionMailer::TestCase
       context "delivering password reset instructions" do
         setup do
