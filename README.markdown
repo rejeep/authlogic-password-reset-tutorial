@@ -128,7 +128,7 @@ Add this route:
      
     <p>Please enter your email address below and then press "Reset Password".</p>
      
-    <% form_tag password_resets_path do %>
+    <%= form_tag password_resets_path do %>
       <%= text_field_tag :email %>
       <%= submit_tag "Reset Password" %>
     <% end %>
@@ -151,7 +151,7 @@ Add this route:
      
     <p>Please enter the new password below and then press "Update Password".</p>
      
-    <% form_tag password_reset_path, :method => :put do %>
+    <%= form_tag password_reset_path, :method => :put do %>
       <%= password_field_tag :password %>
       <%= submit_tag "Update Password" %>
     <% end %>
